@@ -35,10 +35,33 @@ class Snake {
 
   void move() {
     if (blockedMoves > 0) blockedMoves--;
+    if(tails.fold(0, (value, tail) => value + tail.length) >= length){
+      tails.last.decreaseTail();
+    }
     tails.first.extendTail();
-    tails.last.decreaseTail();
     if (tails.last.length <= 0) {
       tails.removeLast();
+    }
+  }
+
+  List<Path> toPaths() {
+    List<Path> paths = [];
+    this.tails.forEach((tail) {
+      var path = tail.toPath();
+      detectSnakeCollision(paths, path);
+      paths.add(path);
+    });
+    return paths;
+  }
+
+  void detectSnakeCollision(List<Path> paths, Path path) {
+    // we skip the last one because it cant collide anyway and we overlap for cosmetical reason
+    for (int i = 0; i < paths.length -1; i++){
+      var combine = Path.combine(PathOperation.intersect, paths[i], path);
+      if (combine.computeMetrics().length > 0) {
+        print("over");
+        this.alive = false;
+      }
     }
   }
 }
@@ -128,5 +151,59 @@ class Tail {
 
   void setSize(Size size){
     this.size = size;
+  }
+
+  Path toPath() {
+    var path = Path();
+    Point endPoint = this.getEndPoint();
+    endPoint.adjustToSeamlessFit(this.dir);
+    bool isOverSide = false;
+    switch (this.dir.oppositDir) {
+      case Direction.up:
+        if (this.start.y > endPoint.y) {
+          isOverSide = true;
+          path.addRect(calcRectFromTo(this.start, Point(size, this.start.x, size.height), WIDTH));
+          path.addRect(
+              calcRectFromTo(Point(size, this.start.x, 0), endPoint, WIDTH));
+        }
+        break;
+      case Direction.right:
+        if (this.start.x < endPoint.x) {
+          isOverSide = true;
+          path.addRect(calcRectFromTo(this.start, Point(size ,0, this.start.y), WIDTH));
+          path.addRect(calcRectFromTo(Point(size, size.width, this.start.y), endPoint, WIDTH));
+        }
+        break;
+      case Direction.left:
+        if (this.start.x > endPoint.x) {
+          isOverSide = true;
+          path.addRect(calcRectFromTo(this.start, Point(size, size.width, this.start.y), WIDTH));
+          path.addRect(
+              calcRectFromTo(Point(size, 0, this.start.y), endPoint, WIDTH));
+        }
+        break;
+      case Direction.down:
+        if (this.start.y < endPoint.y) {
+          isOverSide = true;
+          path.addRect(calcRectFromTo(this.start, Point(size, this.start.x, 0), WIDTH));
+          path.addRect(calcRectFromTo(Point(size, this.start.x, size.height), endPoint, WIDTH));
+        }
+    }
+    if (!isOverSide) {
+      path.addRect(calcRectFromTo(this.start, endPoint, WIDTH));
+    }
+    return path;
+  }
+
+  calcRectFromTo(Point start, Point end, double width) {
+    //left right
+    if (start.y == end.y) {
+      return Rect.fromLTWH(start.x,
+          start.y - width / 2, end.x - start.x, width);
+      //up down
+    } else if (start.x == end.x) {
+      return Rect.fromLTWH(start.x - width / 2,
+          start.y, width, end.y - start.y);
+    }
   }
 }
