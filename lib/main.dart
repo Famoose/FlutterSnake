@@ -3,21 +3,24 @@ import 'dart:developer' as d;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:psnake/control.dart';
 import 'package:psnake/snake-painter.dart';
+import 'package:psnake/styles/styles.dart';
 import 'dart:math';
 
 import 'direction.dart';
+import 'model/app-state-model.dart';
+import 'model/game-state.dart';
 
 void main() {
-  runApp(MyApp());
+  return runApp(
+    ChangeNotifierProvider<AppStateModel>(
+      create: (_) => AppStateModel(),
+      child: MyApp(),
+    ),
+  );
 }
-
-TextStyle normalTextStyle = TextStyle(
-    fontSize: 14,
-    fontStyle: FontStyle.normal,
-    color: Colors.black,
-    decoration: TextDecoration.none);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -48,39 +51,39 @@ class MySnake extends StatefulWidget {
 
 class _MySnakeState extends State<MySnake> {
   GameState gameState;
-  GlobalKey _keyRed = GlobalKey();
+  GlobalKey _keyGameBoard = GlobalKey();
+
   _getSizes() {
-    final RenderBox renderBoxRed = _keyRed.currentContext.findRenderObject();
-    final sizeRed = renderBoxRed.size;
-    print("SIZE of Red: $sizeRed");
-    return sizeRed;
+    final RenderBox renderGameBox =
+        _keyGameBoard.currentContext.findRenderObject();
+    final sizeGameBox = renderGameBox.size;
+    print("SIZE of GameBox: $sizeGameBox");
+    return sizeGameBox;
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => postBuild(context));
+    gameState = GameState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => postBuild(context));
+    // At some time you need to complete the future:
   }
 
   void postBuild(BuildContext context) {
     setState(() {
-      gameState = GameState(_getSizes());
+      gameState.createSnake(_getSizes());
     });
-    Timer.periodic(const Duration(milliseconds: 10), (_) {
+    gameState.startGame(() {
       setState(() {
-        gameState.snake.move();
+        gameState.gameTick();
       });
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void changeDir(Direction direction) {
-    gameState.snake.setDir(direction);
+    setState(() {
+      gameState.changeDir(direction);
+    });
   }
 
   @override
@@ -104,20 +107,38 @@ class _MySnakeState extends State<MySnake> {
                 child: Stack(children: <Widget>[
               CustomPaint(
                 painter: SnakePainter(this.gameState),
-                child: Container(key: _keyRed),
+                child: Container(key: _keyGameBoard),
               ),
-              Text(
-                "Debug - Tails: ",
-                style: normalTextStyle,
-              )
+              TextOverlay(this.gameState)
             ]))));
   }
 }
 
-class GameState {
-  Snake snake;
-  Size size;
-  GameState(this.size) {
-    snake = new Snake.start(size, Direction.right, 100);
+class TextOverlay extends StatelessWidget {
+  GameState gameState;
+
+  TextOverlay(this.gameState);
+
+  @override
+  Widget build(BuildContext context) {
+    if (gameState.running) {
+      return Flex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+                child: Text(
+              "Debug - lenght: " + gameState.snake.length.toString(),
+              style: normalTextStyle,
+            )),
+            Flexible(
+                child: Text(
+              "Debug - Death: " + gameState.snake.alive.toString(),
+              style: normalTextStyle,
+            ))
+          ]);
+    } else {
+      return Container();
+    }
   }
 }
