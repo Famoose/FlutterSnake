@@ -15,7 +15,7 @@ class GameState {
 
   createSnake(Size size) {
     this.size = size;
-    this.snake = new Snake.start(size, Direction.up, 80, 20);
+    this.snake = new Snake.start(this.size, Direction.up, 80, size.width/20);
     newGoal();
     newGoal();
     newGoal();

@@ -243,9 +243,9 @@ class Tail {
 
   bool checkOverMaxLength() {
     if (this.dir == Direction.left || this.dir == Direction.right) {
-      return this.length >= size.width - WIDTH / 2;
+      return this.length > size.width - WIDTH / 2;
     } else {
-      return this.length >= size.height - WIDTH / 2;
+      return this.length > size.height - WIDTH / 2;
     }
   }
 }
