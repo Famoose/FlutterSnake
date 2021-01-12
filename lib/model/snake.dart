@@ -1,8 +1,6 @@
 import 'dart:ui';
 
-import '../direction.dart';
-
-const double WIDTH = 10;
+import '../game/direction.dart';
 
 class Snake {
   List<Tail> tails;
@@ -11,13 +9,14 @@ class Snake {
   Size size;
   int blockedMoves = 0;
   bool alive = true;
+  final double WIDTH;
 
-  Snake(this.tails, this.dir, this.length);
+  Snake(this.tails, this.dir, this.length, this.WIDTH);
 
-  Snake.start(this.size, this.dir, this.length) {
+  Snake.start(this.size, this.dir, this.length, this.WIDTH) {
     tails = [
       new Tail(size, new Point(size, size.width / 2, size.height / 2),
-          dir.oppositDir, length)
+          dir.oppositDir, length, WIDTH)
     ];
   }
 
@@ -32,7 +31,7 @@ class Snake {
               size,
               new Point(size, tails.first.start.x, tails.first.start.y),
               dir.oppositDir,
-              0));
+              0, WIDTH));
     }
   }
 
@@ -104,7 +103,7 @@ class Point {
     _x = x % (size.width + 1);
   }
 
-  adjustToSeamlessFit(Direction dir) {
+  adjustToSeamlessFit(Direction dir, double WIDTH) {
     switch (dir) {
       case Direction.up:
         _y -= WIDTH / 2;
@@ -127,8 +126,9 @@ class Tail {
   Direction dir;
   double length;
   Size size;
+  final double WIDTH;
 
-  Tail(this.size, this.start, this.dir, this.length);
+  Tail(this.size, this.start, this.dir, this.length, this.WIDTH);
 
   extendTail({double length = 1}) {
     switch (this.dir) {
@@ -176,7 +176,7 @@ class Tail {
   List<Path> toPath() {
     List<Path> paths = [];
     Point endPoint = this.getEndPoint();
-    endPoint.adjustToSeamlessFit(this.dir);
+    endPoint.adjustToSeamlessFit(this.dir, this.WIDTH);
     bool isOverSide = false;
     switch (this.dir.oppositDir) {
       case Direction.up:

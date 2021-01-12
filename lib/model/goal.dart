@@ -7,10 +7,10 @@ class Goal {
   Offset center;
   Size boardSize;
   double points;
-
-  Goal(this.boardSize) {
+  final double WIDTH;
+  Goal(this.boardSize, this.WIDTH) {
     moveToRandomPosition();
-    points = new Random().nextInt(100).toDouble();
+    points = 1 / WIDTH * 1000;
   }
 
   moveToRandomPosition() {

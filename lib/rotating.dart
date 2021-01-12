@@ -85,7 +85,6 @@ class ShapePainter extends CustomPainter {
 
     Offset center = Offset(size.width / 2, size.height / 2);
 
-// startPoint => (100.0, 0.0)
     Offset startPoint = Offset(radius * cos(0.0), radius * sin(0.0));
 
     path.moveTo(startPoint.dx + center.dx, startPoint.dy + center.dy);
