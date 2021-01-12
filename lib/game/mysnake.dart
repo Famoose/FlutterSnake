@@ -89,7 +89,7 @@ class TextOverlay extends StatelessWidget {
           children: [
             Flexible(
                 child: Text(
-                  "Debug - lenght: " + gameState.snake.length.toString(),
+                  "Debug - length: " + gameState.snake.length.toString(),
                   style: normalTextStyle,
                 )),
             Flexible(
