@@ -32,8 +32,9 @@ class SnakePainter extends CustomPainter {
     for (int i = 0; i < goals.length; i++){
       var combine = Path.combine(PathOperation.intersect, goals[i], snakeHead);
       if (combine.computeMetrics().length > 0) {
-        gameState.snake.length += 50;
+        gameState.snake.length += gameState.goals[i].points;
         gameState.goals.removeAt(i);
+        gameState.newGoal();
       }
     }
   }

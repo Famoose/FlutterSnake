@@ -6,9 +6,11 @@ import 'package:psnake/model/snake.dart';
 class Goal {
   Offset center;
   Size boardSize;
+  double points;
 
   Goal(this.boardSize) {
     moveToRandomPosition();
+    points = new Random().nextInt(100).toDouble();
   }
 
   moveToRandomPosition() {

@@ -14,11 +14,15 @@ class GameState {
 
   createSnake(Size size) {
     this.size = size;
-    this.snake = new Snake.start(size, Direction.right, 100);
-    this.goals.add(Goal(this.size));
-    this.goals.add(Goal(this.size));
-    this.goals.add(Goal(this.size));
-    this.goals.add(Goal(this.size));
+    this.snake = new Snake.start(size, Direction.right, 80);
+    newGoal();
+    newGoal();
+    newGoal();
+    newGoal();
+    newGoal();
+  }
+
+  newGoal() {
     this.goals.add(Goal(this.size));
   }
 
@@ -33,7 +37,6 @@ class GameState {
     if(snake.alive){
       snake.move();
     }else{
-      running = false;
       timer.cancel();
     }
   }
