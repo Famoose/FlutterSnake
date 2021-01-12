@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:psnake/model/snake.dart';
+import 'snake.dart';
 
 class Goal {
   Offset center;

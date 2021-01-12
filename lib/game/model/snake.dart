@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import '../game/direction.dart';
+import '../direction.dart';
 
 class Snake {
   List<Tail> tails;

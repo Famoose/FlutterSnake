@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import 'game/mysnake.dart';
-import 'model/app-state-model.dart';
+import 'app-state-model.dart';
 
 void main() {
   return runApp(

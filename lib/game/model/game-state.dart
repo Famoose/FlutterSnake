@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
-import '../game/direction.dart';
+import '../direction.dart';
 import 'goal.dart';
 import 'snake.dart';
 
@@ -15,7 +15,7 @@ class GameState {
 
   createSnake(Size size) {
     this.size = size;
-    this.snake = new Snake.start(size, Direction.right, 80, 20);
+    this.snake = new Snake.start(size, Direction.up, 80, 20);
     newGoal();
     newGoal();
     newGoal();

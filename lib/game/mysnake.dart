@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:psnake/model/game-state.dart';
-import 'package:psnake/snake-painter.dart';
+import './model/game-state.dart';
+import 'package:psnake/game/snake-painter.dart';
 import 'package:psnake/styles/styles.dart';
 
 import 'direction.dart';
@@ -94,7 +94,7 @@ class TextOverlay extends StatelessWidget {
                 )),
             Flexible(
                 child: Text(
-                  "Debug - Death: " + gameState.snake.alive.toString(),
+                  "Debug - Alive: " + gameState.snake.alive.toString(),
                   style: normalTextStyle,
                 ))
           ]);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'game/direction.dart';
+import 'direction.dart';
 import 'model/game-state.dart';
 import 'model/snake.dart';
 
