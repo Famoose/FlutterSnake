@@ -9,7 +9,7 @@ import 'app-state-model.dart';
 void main() {
   return runApp(
     ChangeNotifierProvider<AppStateModel>(
-      create: (context) => AppStateModel(),
+      create: (context) => AppStateModel()..readScore(),
       child: MyApp(),
     ),
   );
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: 'Snake',
-      color: Colors.white,
+      color: CupertinoColors.white,
       initialRoute: HomeViewRoute,
       onGenerateRoute: router.generateRoute,
       onUnknownRoute: (settings) => CupertinoPageRoute(
@@ -36,28 +36,29 @@ class SinglePlayerGamePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        backgroundColor: Colors.white, child: MySnake());
+        backgroundColor: CupertinoColors.white, child: MySnake());
   }
 }
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext mcontext) {
+    final model = Provider.of<AppStateModel>(mcontext);
     return CupertinoPageScaffold(
         child: CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.play),
-            title: Text('Play'),
+            label: 'Play',
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.antenna_radiowaves_left_right),
-            title: Text('Multiplayer'),
+            label: 'Multiplayer',
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.star),
-            title: Text('Highscore'),
+            label: 'Highscore',
           ),
         ],
       ),
@@ -68,7 +69,7 @@ class HomePage extends StatelessWidget {
               return CupertinoPageScaffold(
                 child: Center(
                     child: CupertinoButton(
-                        child: Text("Start Game"),
+                        child: Center(child: Text("Start Game")),
                         onPressed: () =>
                             Navigator.pushNamed(mcontext, GameViewRoute))),
               );
@@ -76,13 +77,28 @@ class HomePage extends StatelessWidget {
           case 1:
             return CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: Text("implementation ongoing"),
+                child: Center(child: Text("implementation ongoing")),
               );
             });
           case 2:
             return CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: Text("implementation ongoing"),
+                child: ListView.builder(
+                  // Let the ListView know how many items it needs to build.
+                  itemCount: model.getScores().length,
+                  // Provide a builder function. This is where the magic happens.
+                  // Convert each item into a widget based on the type of item it is.
+                  itemBuilder: (context, index) {
+                    final item = model.getScores()[index];
+
+                    return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(item.score.toInt().toString()),
+                          //Text(item.time.toString())
+                        ]);
+                  },
+                ),
               );
             });
           default:

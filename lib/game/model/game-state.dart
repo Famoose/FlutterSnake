@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+
+import '../../app-state-model.dart';
 import '../direction.dart';
 import 'goal.dart';
 import 'snake.dart';
@@ -15,7 +19,7 @@ class GameState {
 
   createSnake(Size size) {
     this.size = size;
-    this.snake = new Snake.start(this.size, Direction.up, 80, size.width/20);
+    this.snake = new Snake.start(this.size, Direction.up, 80, size.width/40);
     newGoal();
     newGoal();
     newGoal();
@@ -34,11 +38,13 @@ class GameState {
     });
   }
 
-  gameTick() {
+  gameTick(BuildContext context) {
     if(snake.alive){
       snake.move();
     }else{
       timer.cancel();
+      final model = Provider.of<AppStateModel>(context, listen: false);
+      model.addScore(this.snake.length);
     }
   }
 

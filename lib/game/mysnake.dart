@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../app-state-model.dart';
+import '../router.dart';
 import './model/game-state.dart';
 import 'package:psnake/game/snake-painter.dart';
 import 'package:psnake/styles/styles.dart';
@@ -37,7 +40,7 @@ class _MySnakeState extends State<MySnake> {
     });
     gameState.startGame(() {
       setState(() {
-        gameState.gameTick();
+        gameState.gameTick(context);
       });
     });
   }
@@ -108,23 +111,21 @@ class TextOverlay extends StatelessWidget {
             ))
           ]);
     } else if (gameState.running && !gameState.snake.alive) {
-      return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Your Score: " + gameState.snake.length.toInt().toString())
-                ]),
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  CupertinoButton(child: Text("Restart"), onPressed: resetGame)
-                ])
-          ]);
+      return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: Colors.white,
+            leading: CupertinoButton(
+                child: Center(child:Icon(Icons.arrow_back_ios)),
+                onPressed: () => Navigator.pushNamed(context, HomeViewRoute)),
+          ),
+          child: Center(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                Text("Your Score: " + gameState.snake.length.toInt().toString()),
+                CupertinoButton(child: Text("Restart"), onPressed: resetGame)
+              ])));
     } else {
       return Container();
     }
