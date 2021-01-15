@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:psnake/game/mysnake.dart';
 import 'package:psnake/router.dart';
@@ -53,7 +52,7 @@ class HomePage extends StatelessWidget {
             label: 'Play',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.antenna_radiowaves_left_right),
+            icon: Icon(CupertinoIcons.group),
             label: 'Multiplayer',
           ),
           BottomNavigationBarItem(

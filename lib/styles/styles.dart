@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 final TextStyle normalTextStyle = TextStyle(
     fontSize: 14,
     fontStyle: FontStyle.normal,
-    color: Colors.black,
+    color: CupertinoColors.black,
     decoration: TextDecoration.none);

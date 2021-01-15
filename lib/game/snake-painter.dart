@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+
+import 'package:flutter/cupertino.dart';
 
 import 'direction.dart';
 import 'model/game-state.dart';
@@ -11,7 +12,7 @@ class SnakePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()..color = Colors.redAccent;
+    var paint = Paint()..color = CupertinoColors.activeBlue;
 
     if (gameState.running) {
       List<Path> goalPaths = [];

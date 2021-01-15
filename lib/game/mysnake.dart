@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../app-state-model.dart';
 import '../router.dart';
@@ -17,6 +16,12 @@ class MySnake extends StatefulWidget {
 class _MySnakeState extends State<MySnake> {
   GameState gameState;
   GlobalKey _keyGameBoard = GlobalKey();
+
+  @override
+  void dispose(){
+    gameState.timer.cancel();
+    super.dispose();
+  }
 
   _getSizes() {
     final RenderBox renderGameBox =
@@ -62,7 +67,7 @@ class _MySnakeState extends State<MySnake> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onPanUpdate: (details) {
-          double offset = 6;
+          double offset = 7;
           if (details.delta.dx > offset) {
             changeDir(Direction.right);
           } else if (details.delta.dx < -offset) {
@@ -74,7 +79,7 @@ class _MySnakeState extends State<MySnake> {
           }
         },
         child: Container(
-            color: Colors.white,
+            color: CupertinoColors.white,
             child: SafeArea(
                 child: Stack(children: <Widget>[
               CustomPaint(
@@ -113,9 +118,9 @@ class TextOverlay extends StatelessWidget {
     } else if (gameState.running && !gameState.snake.alive) {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
-            backgroundColor: Colors.white,
+            backgroundColor: CupertinoColors.white,
             leading: CupertinoButton(
-                child: Center(child:Icon(Icons.arrow_back_ios)),
+                child: Center(child:Icon(CupertinoIcons.back)),
                 onPressed: () => Navigator.pushNamed(context, HomeViewRoute)),
           ),
           child: Center(
