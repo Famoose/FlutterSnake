@@ -12,7 +12,7 @@ class SnakePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()..color = CupertinoColors.activeBlue;
+    var paint = Paint()..color = CupertinoColors.systemPink;
 
     if (gameState.running) {
       List<Path> goalPaths = [];
