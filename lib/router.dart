@@ -1,15 +1,21 @@
 import 'package:flutter/cupertino.dart';
+import 'package:psnake/singleplayer/single-player-snake.dart';
+
 import 'main.dart';
+import 'multiplayer/multi-player-snake.dart';
 
 const String HomeViewRoute = '/';
-const String GameViewRoute = 'game';
+const String SingleGameViewRoute = 'singlegame';
+const String MultiGameViewRoute = 'multigame';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case HomeViewRoute:
       return CupertinoPageRoute(builder: (context) => HomePage());
-    case GameViewRoute:
+    case SingleGameViewRoute:
       return CupertinoPageRoute(builder: (context) => SinglePlayerGamePage());
+    case MultiGameViewRoute:
+      return CupertinoPageRoute(builder: (context) => MultiplayerPlayerGamePage(deviceType: settings.arguments));
     default:
       return CupertinoPageRoute(builder: (context) => HomePage());
   }

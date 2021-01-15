@@ -41,5 +41,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSBonjourServices</key>
+        <array>
+            <string>_{snake-connection}._tcp</string>
+        </array>
+        <key>UIRequiresPersistentWiFi</key>
+        <true/>
+        <key>NSBluetoothAlwaysUsageDescription</key>
+        <string>{YOUR_DESCRIPTION}</string>
 </dict>
 </plist>

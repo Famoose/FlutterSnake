@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:psnake/game/mysnake.dart';
 import 'package:psnake/router.dart';
-import 'router.dart' as router;
 import 'app-state-model.dart';
+import 'multiplayer/multi-player-snake.dart';
+import 'router.dart' as router;
 
 void main() {
   return runApp(
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: 'Snake',
-      color: CupertinoColors.white,
+      theme: CupertinoThemeData(primaryColor: CupertinoColors.systemPink),
       initialRoute: HomeViewRoute,
       onGenerateRoute: router.generateRoute,
       onUnknownRoute: (settings) => CupertinoPageRoute(
@@ -28,14 +28,6 @@ class MyApp extends StatelessWidget {
                 name: settings.name,
               )),
     );
-  }
-}
-
-class SinglePlayerGamePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.white, child: MySnake());
   }
 }
 
@@ -70,13 +62,46 @@ class HomePage extends StatelessWidget {
                     child: CupertinoButton(
                         child: Center(child: Text("Start Game")),
                         onPressed: () =>
-                            Navigator.pushNamed(mcontext, GameViewRoute))),
+                            Navigator.pushNamed(mcontext, SingleGameViewRoute))),
               );
             });
           case 1:
             return CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: Center(child: Text("implementation ongoing")),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: CupertinoButton(
+                        onPressed: () {
+                          Navigator.pushNamed(mcontext, MultiGameViewRoute,);
+                        },
+                        child: Container(
+                          color: CupertinoColors.systemRed,
+                          child: Center(
+                              child: Text(
+                                'BROWSER',
+                                style: TextStyle(color: CupertinoColors.white, fontSize: 40),
+                              )),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: CupertinoButton(
+                        onPressed: () {
+                          Navigator.pushNamed(mcontext, MultiGameViewRoute, arguments: DeviceType.advertiser);
+                        },
+                        child: Container(
+                          color: CupertinoColors.activeGreen,
+                          child: Center(
+                              child: Text(
+                                'ADVERTISER',
+                                style: TextStyle(color: CupertinoColors.white, fontSize: 40),
+                              )),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             });
           case 2:

@@ -137,6 +137,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_nearby_connections:
+    dependency: "direct main"
+    description:
+      name: flutter_nearby_connections
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.10"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -147,6 +154,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: transitive
+    description:
+      name: fluttertoast
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.1.6"
   fuchsia_remote_debug_protocol:
     dependency: transitive
     description: flutter
