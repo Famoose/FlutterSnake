@@ -31,7 +31,8 @@ dependencies:
   provider: ^4.0.0
   shared_preferences: '>=0.5.0 <2.0.0'
   flutter_nearby_connections: ^1.0.10
-
+  ping_discover_network: ^0.2.0+1
+  wifi: ^0.1.5
 
 dev_dependencies:
   flutter_test:

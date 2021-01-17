@@ -1,10 +1,8 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
+import 'package:wifi/wifi.dart';
+import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
-import 'package:psnake/styles/divider.dart';
+import 'package:psnake/multiplayer/abstract-connection.dart';
 
 class MultiplayerPlayerGamePage extends StatelessWidget {
   final DeviceType deviceType;
@@ -13,251 +11,111 @@ class MultiplayerPlayerGamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        child: DevicesListScreen(deviceType: deviceType));
+    return CupertinoPageScaffold(child: MySocketConnector(deviceType: deviceType));
+
   }
 }
 
-enum DeviceType { advertiser, browser }
-
-class DevicesListScreen extends StatefulWidget {
-  const DevicesListScreen({this.deviceType});
-
+class MySocketConnector extends StatefulWidget {
   final DeviceType deviceType;
 
+  MySocketConnector({this.deviceType});
+
   @override
-  _DevicesListScreenState createState() => _DevicesListScreenState();
+  _MySocketConnectorState createState() => _MySocketConnectorState();
 }
 
-class _DevicesListScreenState extends State<DevicesListScreen> {
-  List<Device> devices = [];
-  List<Device> connectedDevices = [];
-  NearbyService nearbyService;
-  StreamSubscription subscription;
-  StreamSubscription receivedDataSubscription;
-
-  bool isInit = false;
+class _MySocketConnectorState extends State<MySocketConnector> {
+  ConnectionHandler connectionHandler;
 
   @override
   void initState() {
+    connectionHandler = new ConnectionHandler(widget.deviceType);
+    connectionHandler.init();
     super.initState();
-    init();
   }
 
   @override
   void dispose() {
-    subscription?.cancel();
-    receivedDataSubscription?.cancel();
-    nearbyService.stopBrowsingForPeers();
-    nearbyService.stopAdvertisingPeer();
+    connectionHandler.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-            itemCount: getItemCount(),
-            itemBuilder: (context, index) {
-              final device = widget.deviceType == DeviceType.advertiser
-                  ? connectedDevices[index]
-                  : devices[index];
-              return Container(
-                margin: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTabItemListener(device),
-                              child: Column(
-                                children: [
-                                  Text(device.deviceName),
-                                  Text(
-                                    getStateName(device.state),
-                                    style: TextStyle(
-                                        color: getStateColor(device.state)),
-                                  ),
-                                ],
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                              ),
-                            )),
-                        // Request connect
-                        GestureDetector(
-                          onTap: () => _onButtonClicked(device),
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 8.0),
-                            padding: EdgeInsets.all(8.0),
-                            height: 35,
-                            width: 100,
-                            color: getButtonColor(device.state),
-                            child: Center(
-                              child: Text(
-                                getButtonStateName(device.state),
-                                style: TextStyle(
-                                    color: CupertinoColors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    CupertinoDivider()
-                  ],
-                ),
-              );
-            });
+    return Center(child: CupertinoButton(
+        child: Text("ping"), onPressed: () => connectionHandler.write("ping")));
   }
+}
 
-  String getStateName(SessionState state) {
-    switch (state) {
-      case SessionState.notConnected:
-        return "disconnected";
-      case SessionState.connecting:
-        return "waiting";
-      default:
-        return "connected";
+class ConnectionHandler extends AbstractConnection {
+  static final int PORT = 29843;
+  ServerSocket serverSocket;
+  Socket socket;
+
+  ConnectionHandler(DeviceType deviceType) : super(deviceType);
+
+  @override
+  init() async{
+    switch (this.deviceType) {
+      case DeviceType.advertiser:
+        Wifi.ip.then((ip) => print(ip));
+        ServerSocket.bind(InternetAddress.anyIPv4, PORT).then((s) {
+          serverSocket = s;
+          print("Socket online");
+          serverSocket.listen(listen);
+        });
+        break;
+      case DeviceType.browser:
+        browserIpAndConnect(PORT).then((socket) {
+          listen(socket);
+          write("test from client " + DateTime.now().toString());
+          write("hoi bibi " + DateTime.now().toString());
+        });
+        break;
     }
   }
 
-  String getButtonStateName(SessionState state) {
-    switch (state) {
-      case SessionState.notConnected:
-      case SessionState.connecting:
-        return "Connect";
-      default:
-        return "Disconnect";
-    }
+  setSocket(Socket s) {
+    // close open socket and replace
+    socket?.close();
+    s.setOption(SocketOption.tcpNoDelay, true);
+    socket = s;
   }
 
-  Color getStateColor(SessionState state) {
-    switch (state) {
-      case SessionState.notConnected:
-        return CupertinoColors.black;
-      case SessionState.connecting:
-        return CupertinoColors.systemGrey;
-      default:
-        return CupertinoColors.activeGreen;
-    }
+  @override
+  listen(Socket s) {
+    setSocket(s);
+    print("Socket is listening");
+    socket.map((data) => String.fromCharCodes(data).trim()).listen((data) {
+      var time = DateTime.now().toString();
+      print(time + ": " + data);
+    });
   }
 
-  Color getButtonColor(SessionState state) {
-    switch (state) {
-      case SessionState.notConnected:
-      case SessionState.connecting:
-        return CupertinoColors.activeGreen;
-      default:
-        return CupertinoColors.systemRed;
-    }
+  @override
+  write(String s) {
+    socket?.write(s);
   }
 
-  _onTabItemListener(Device device) {
-    if (device.state == SessionState.connected) {
-      showCupertinoDialog(
-          context: context,
-          builder: (BuildContext context) {
-            final myController = TextEditingController();
-            return CupertinoAlertDialog(
-              title: Text("Send message"),
-              content: CupertinoTextField(controller: myController),
-              actions: [
-                CupertinoButton(
-                  child: Text("Cancel"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                CupertinoButton(
-                  child: Text("Send"),
-                  onPressed: () {
-                    nearbyService.sendMessage(
-                        device.deviceId, myController.text);
-                    myController.text = '';
-                  },
-                )
-              ],
-            );
-          });
-    }
-  }
+  Future<Socket> browserIpAndConnect(int port) async {
+    final String ip = await Wifi.ip;
+    final String subnet = ip.substring(0, ip.lastIndexOf('.'));
 
-  int getItemCount() {
-    if (widget.deviceType == DeviceType.advertiser) {
-      return connectedDevices.length;
+    final addr = await NetworkAnalyzer.discover2(subnet, port,
+        timeout: Duration(milliseconds: 5000))
+        .firstWhere((addr) => addr.exists);
+    if (addr != null) {
+      print("found devise at: " + addr.ip);
+      return Socket.connect(addr.ip, port);
     } else {
-      return devices.length;
+      throw Exception("Could not find device");
     }
   }
 
-  _onButtonClicked(Device device) {
-    switch (device.state) {
-      case SessionState.notConnected:
-        nearbyService.invitePeer(
-          deviceID: device.deviceId,
-          deviceName: device.deviceName,
-        );
-        break;
-      case SessionState.connected:
-        nearbyService.disconnectPeer(deviceID: device.deviceId);
-        break;
-      case SessionState.connecting:
-        break;
-    }
-  }
-
-  void init() async {
-    nearbyService = NearbyService();
-    await nearbyService.init(
-        serviceType: 'mp-connection',
-        strategy: Strategy.P2P_CLUSTER,
-        callback: (isRunning) async {
-          if (isRunning) {
-            if (widget.deviceType == DeviceType.browser) {
-              await nearbyService.stopBrowsingForPeers();
-              await nearbyService.startBrowsingForPeers();
-            } else {
-              await nearbyService.stopAdvertisingPeer();
-              await nearbyService.startAdvertisingPeer();
-
-              await nearbyService.stopBrowsingForPeers();
-              await nearbyService.startBrowsingForPeers();
-            }
-          }
-        });
-    subscription =
-        nearbyService.stateChangedSubscription(callback: (devicesList) {
-          devicesList?.forEach((element) {
-            print(
-                " deviceId: ${element.deviceId} | deviceName: ${element
-                    .deviceName} | state: ${element.state}");
-
-            if (Platform.isAndroid) {
-              if (element.state == SessionState.connected) {
-                nearbyService.stopBrowsingForPeers();
-              } else {
-                nearbyService.startBrowsingForPeers();
-              }
-            }
-          });
-
-          setState(() {
-            devices.clear();
-            devices.addAll(devicesList);
-            connectedDevices.clear();
-            connectedDevices.addAll(devicesList
-                .where((d) => d.state == SessionState.connected)
-                .toList());
-          });
-        });
-
-    receivedDataSubscription =
-        nearbyService.dataReceivedSubscription(callback: (data) {
-          print("dataReceivedSubscription: ${jsonEncode(data)}");
-          //Fluttertoast.showToast(msg: jsonEncode(data));
-        });
+  @override
+  void close() {
+    socket?.close();
+    serverSocket?.close();
   }
 }

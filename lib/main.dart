@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:psnake/router.dart';
 import 'app-state-model.dart';
+import 'multiplayer/abstract-connection.dart';
+import 'multiplayer/archive/nearby_descovery.dart';
 import 'multiplayer/multi-player-snake.dart';
 import 'router.dart' as router;
 
@@ -73,7 +75,7 @@ class HomePage extends StatelessWidget {
                     Expanded(
                       child: CupertinoButton(
                         onPressed: () {
-                          Navigator.pushNamed(mcontext, MultiGameViewRoute,);
+                          Navigator.pushNamed(mcontext, MultiGameViewRoute, arguments: DeviceType.browser);
                         },
                         child: Container(
                           color: CupertinoColors.systemRed,
