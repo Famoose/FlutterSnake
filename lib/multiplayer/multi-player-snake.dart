@@ -105,16 +105,16 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
           }
         });
       });
-      widget.connectionHandler.onData((data) {
+      widget.connectionHandler.onData = (data) {
         Direction dir = fromString(data);
         gameState.otherSnake.setDir(dir);
-      });
+      };
     }else{
-      widget.connectionHandler.onData((data) {
+      widget.connectionHandler.onData =(data) {
         var snake = jsonDecode(data);
         gameState.snake = Snake.fromJson(snake[0]);
         gameState.otherSnake = Snake.fromJson(snake[1]);
-      });
+      };
     }
   }
 
