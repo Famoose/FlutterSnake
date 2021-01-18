@@ -19,3 +19,7 @@ extension DirectionExt on Direction {
     }
   }
 }
+
+Direction fromString(String s){
+  return Direction.values.firstWhere((e) => e.toString() == s);
+}

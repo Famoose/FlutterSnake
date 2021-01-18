@@ -46,6 +46,7 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
   void postBuild() {
     setState(() {
       gameState.createSnake(_getSizes());
+      gameState.createGoals(5);
     });
     gameState.startGame(() {
       setState(() {

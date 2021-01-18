@@ -13,6 +13,7 @@ class GameState {
   final Duration speed = Duration(milliseconds: 10);
   Timer timer;
   Snake snake;
+  Snake otherSnake;
   Size size;
   bool running = false;
   List<Goal> goals = [];
@@ -20,11 +21,17 @@ class GameState {
   createSnake(Size size) {
     this.size = size;
     this.snake = new Snake.start(this.size, Direction.up, 80, size.width/40);
-    newGoal();
-    newGoal();
-    newGoal();
-    newGoal();
-    newGoal();
+  }
+
+  createOtherSnake(Size size) {
+    this.size = size;
+    this.otherSnake = new Snake.start(this.size, Direction.up, 80, size.width/40);
+  }
+
+  createGoals(int number) {
+    for(int i = 0; i < number; i++){
+      newGoal();
+    }
   }
 
   newGoal() {

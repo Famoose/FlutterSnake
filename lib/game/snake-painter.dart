@@ -25,6 +25,13 @@ class SnakePainter extends CustomPainter {
       snakePaths.forEach((path) {
         canvas.drawPath(path, paint);
       });
+      //hacky
+      if(gameState.otherSnake != null){
+        var snakePaths = gameState.otherSnake.toPaths();
+        snakePaths.forEach((path) {
+          canvas.drawPath(path, paint);
+        });
+      }
       checkForPoints(snakePaths.first, goalPaths);
     }
   }

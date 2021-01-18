@@ -1,21 +1,28 @@
 import 'dart:ui';
 
-import '../direction.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+import '../direction.dart';
+part 'snake.g.dart';
+
+
+@JsonSerializable(explicitToJson: true)
 class Snake {
   List<Tail> tails;
   Direction dir;
   double length;
-  Size size;
+  GameSize size;
   int blockedMoves = 0;
   bool alive = true;
   final double WIDTH;
 
   Snake(this.tails, this.dir, this.length, this.WIDTH);
 
-  Snake.start(this.size, this.dir, this.length, this.WIDTH) {
+  Snake.start(Size size, this.dir, this.length, this.WIDTH) {
+    this.size = GameSize(size.width, size.height);
+
     tails = [
-      new Tail(size, new Point(size, size.width / 2, size.height / 2),
+      new Tail(this.size, new Point.fromSize(this.size, size.width / 2, size.height / 2),
           dir.oppositDir, length, WIDTH)
     ];
   }
@@ -29,13 +36,13 @@ class Snake {
           0,
           new Tail(
               size,
-              new Point(size, tails.first.start.x, tails.first.start.y),
+              new Point.fromSize(size, tails.first.start.x, tails.first.start.y),
               dir.oppositDir,
               0, WIDTH));
     }
   }
 
-  void setSize(Size size) {
+  void setSize(GameSize size) {
     this.size = size;
   }
 
@@ -72,16 +79,17 @@ class Snake {
         }
       }
     });
-    // todo refactor but it works (only max 2 tails)
-    // check if tails overlap
     if (tails.any((tail) => tail.checkOverMaxLength())) {
       print("over");
       this.alive = false;
       return;
     }
   }
+  factory Snake.fromJson(Map<String, dynamic> json) => _$SnakeFromJson(json);
+  Map<String, dynamic> toJson() => _$SnakeToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class Point {
   double _x;
   double _y;
@@ -90,16 +98,22 @@ class Point {
 
   double get y => _y;
 
-  Point(Size size, double x, double y) {
+
+  Point(double x, double y){
+    this._x = x;
+    this._y = y;
+  }
+
+  Point.fromSize(GameSize size, double x, double y) {
     calcXOffset(size, x);
     calcYOffset(size, y);
   }
 
-  calcYOffset(Size size, double y) {
+  calcYOffset(GameSize size, double y) {
     _y = y % (size.height + 1);
   }
 
-  calcXOffset(size, double x) {
+  calcXOffset(GameSize size, double x) {
     _x = x % (size.width + 1);
   }
 
@@ -119,13 +133,16 @@ class Point {
         break;
     }
   }
+  factory Point.fromJson(Map<String, dynamic> json) => _$PointFromJson(json);
+  Map<String, dynamic> toJson() => _$PointToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class Tail {
   Point start;
   Direction dir;
   double length;
-  Size size;
+  GameSize size;
   final double WIDTH;
 
   Tail(this.size, this.start, this.dir, this.length, this.WIDTH);
@@ -133,16 +150,16 @@ class Tail {
   extendTail({double length = 1}) {
     switch (this.dir) {
       case Direction.up:
-        start = new Point(size, start.x, start.y + length);
+        start = new Point.fromSize(size, start.x, start.y + length);
         break;
       case Direction.right:
-        start = new Point(size, start.x - length, start.y);
+        start = new Point.fromSize(size, start.x - length, start.y);
         break;
       case Direction.left:
-        start = new Point(size, start.x + length, start.y);
+        start = new Point.fromSize(size, start.x + length, start.y);
         break;
       case Direction.down:
-        start = new Point(size, start.x, start.y - length);
+        start = new Point.fromSize(size, start.x, start.y - length);
         break;
     }
     this.length += length;
@@ -155,21 +172,21 @@ class Tail {
   Point getEndPoint() {
     switch (this.dir) {
       case Direction.up:
-        return new Point(size, start.x, start.y - length);
+        return new Point.fromSize(size, start.x, start.y - length);
       case Direction.right:
-        return new Point(size, start.x + length, start.y);
+        return new Point.fromSize(size, start.x + length, start.y);
       case Direction.left:
-        return new Point(
+        return new Point.fromSize(
           size,
           start.x - length,
           start.y,
         );
       case Direction.down:
-        return new Point(size, start.x, start.y + length);
+        return new Point.fromSize(size, start.x, start.y + length);
     }
   }
 
-  void setSize(Size size) {
+  void setSize(GameSize size) {
     this.size = size;
   }
 
@@ -184,10 +201,10 @@ class Tail {
           isOverSide = true;
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                this.start, Point(size, this.start.x, size.height), WIDTH)));
+                this.start, Point.fromSize(size, this.start.x, size.height), WIDTH)));
           paths.add(Path()
             ..addRect(
-                calcRectFromTo(Point(size, this.start.x, 0), endPoint, WIDTH)));
+                calcRectFromTo(Point.fromSize(size, this.start.x, 0), endPoint, WIDTH)));
         }
         break;
       case Direction.right:
@@ -195,10 +212,10 @@ class Tail {
           isOverSide = true;
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                this.start, Point(size, 0, this.start.y), WIDTH)));
+                this.start, Point.fromSize(size, 0, this.start.y), WIDTH)));
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                Point(size, size.width, this.start.y), endPoint, WIDTH)));
+                Point.fromSize(size, size.width, this.start.y), endPoint, WIDTH)));
         }
         break;
       case Direction.left:
@@ -206,10 +223,10 @@ class Tail {
           isOverSide = true;
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                this.start, Point(size, size.width, this.start.y), WIDTH)));
+                this.start, Point.fromSize(size, size.width, this.start.y), WIDTH)));
           paths.add(Path()
             ..addRect(
-                calcRectFromTo(Point(size, 0, this.start.y), endPoint, WIDTH)));
+                calcRectFromTo(Point.fromSize(size, 0, this.start.y), endPoint, WIDTH)));
         }
         break;
       case Direction.down:
@@ -217,10 +234,10 @@ class Tail {
           isOverSide = true;
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                this.start, Point(size, this.start.x, 0), WIDTH)));
+                this.start, Point.fromSize(size, this.start.x, 0), WIDTH)));
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                Point(size, this.start.x, size.height), endPoint, WIDTH)));
+                Point.fromSize(size, this.start.x, size.width), endPoint, WIDTH)));
         }
     }
     if (!isOverSide) {
@@ -248,4 +265,14 @@ class Tail {
       return this.length > size.height - WIDTH / 2;
     }
   }
+
+  factory Tail.fromJson(Map<String, dynamic> json) => _$TailFromJson(json);
+  Map<String, dynamic> toJson() => _$TailToJson(this);
+}
+@JsonSerializable()
+class GameSize{
+  double width, height;
+  GameSize(this.width, this.height);
+  factory GameSize.fromJson(Map<String, dynamic> json) => _$GameSizeFromJson(json);
+  Map<String, dynamic> toJson() => _$GameSizeToJson(this);
 }

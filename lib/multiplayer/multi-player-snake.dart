@@ -1,8 +1,13 @@
-import 'dart:io';
-import 'package:wifi/wifi.dart';
-import 'package:ping_discover_network/ping_discover_network.dart';
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
+import 'package:psnake/game/direction.dart';
+import 'package:psnake/game/model/game-state.dart';
+import 'package:psnake/game/model/snake.dart';
+import 'package:psnake/game/snake-painter.dart';
 import 'package:psnake/multiplayer/abstract-connection.dart';
+
+import '../router.dart';
 
 class MultiplayerPlayerGamePage extends StatelessWidget {
   final DeviceType deviceType;
@@ -12,7 +17,6 @@ class MultiplayerPlayerGamePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(child: MySocketConnector(deviceType: deviceType));
-
   }
 }
 
@@ -31,7 +35,6 @@ class _MySocketConnectorState extends State<MySocketConnector> {
   @override
   void initState() {
     connectionHandler = new ConnectionHandler(widget.deviceType);
-    connectionHandler.init();
     super.initState();
   }
 
@@ -43,79 +46,159 @@ class _MySocketConnectorState extends State<MySocketConnector> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: CupertinoButton(
-        child: Text("ping"), onPressed: () => connectionHandler.write("ping")));
+    return FutureBuilder(future: connectionHandler.init(),
+    builder: (context, snapshot) {
+      return MultiPlayerSnake(connectionHandler);
+    });
   }
 }
 
-class ConnectionHandler extends AbstractConnection {
-  static final int PORT = 29843;
-  ServerSocket serverSocket;
-  Socket socket;
+class MultiPlayerSnake extends StatefulWidget {
 
-  ConnectionHandler(DeviceType deviceType) : super(deviceType);
+  AbstractConnection connectionHandler;
+  MultiPlayerSnake(this.connectionHandler);
 
   @override
-  init() async{
-    switch (this.deviceType) {
-      case DeviceType.advertiser:
-        Wifi.ip.then((ip) => print(ip));
-        ServerSocket.bind(InternetAddress.anyIPv4, PORT).then((s) {
-          serverSocket = s;
-          print("Socket online");
-          serverSocket.listen(listen);
+  _MultiPlayerSnakeState createState() => _MultiPlayerSnakeState();
+}
+
+class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
+  GameState gameState;
+  GlobalKey _keyGameBoard = GlobalKey();
+
+  @override
+  void dispose(){
+    gameState.timer.cancel();
+    super.dispose();
+  }
+
+  _getSizes() {
+    final RenderBox renderGameBox =
+    _keyGameBoard.currentContext.findRenderObject();
+    final sizeGameBox = renderGameBox.size;
+    print("SIZE of GameBox: $sizeGameBox");
+    return sizeGameBox;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    gameState = GameState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => postBuild());
+    // At some time you need to complete the future:
+  }
+
+  void postBuild() {
+    setState(() {
+      gameState.createSnake(_getSizes());
+      gameState.createOtherSnake(_getSizes());
+    });
+    if(widget.connectionHandler.isServer()){
+      gameState.startGame(() {
+        setState(() {
+          if(gameState.snake.alive || gameState.otherSnake.alive){
+            gameState.snake.move();
+            gameState.otherSnake.move();
+            widget.connectionHandler.write(jsonEncode([gameState.snake, gameState.otherSnake]));
+          }else{
+            gameState.timer.cancel();
+          }
         });
-        break;
-      case DeviceType.browser:
-        browserIpAndConnect(PORT).then((socket) {
-          listen(socket);
-          write("test from client " + DateTime.now().toString());
-          write("hoi bibi " + DateTime.now().toString());
-        });
-        break;
+      });
+      widget.connectionHandler.onData((data) {
+        Direction dir = fromString(data);
+        gameState.otherSnake.setDir(dir);
+      });
+    }else{
+      widget.connectionHandler.onData((data) {
+        var snake = jsonDecode(data);
+        gameState.snake = Snake.fromJson(snake[0]);
+        gameState.otherSnake = Snake.fromJson(snake[1]);
+      });
     }
   }
 
-  setSocket(Socket s) {
-    // close open socket and replace
-    socket?.close();
-    s.setOption(SocketOption.tcpNoDelay, true);
-    socket = s;
+  void restartGame() {
+    setState(() {
+      gameState = new GameState();
+    });
+    postBuild();
   }
 
-  @override
-  listen(Socket s) {
-    setSocket(s);
-    print("Socket is listening");
-    socket.map((data) => String.fromCharCodes(data).trim()).listen((data) {
-      var time = DateTime.now().toString();
-      print(time + ": " + data);
+  void changeDir(Direction direction) {
+    setState(() {
+      gameState.changeDir(direction);
     });
   }
 
   @override
-  write(String s) {
-    socket?.write(s);
-  }
-
-  Future<Socket> browserIpAndConnect(int port) async {
-    final String ip = await Wifi.ip;
-    final String subnet = ip.substring(0, ip.lastIndexOf('.'));
-
-    final addr = await NetworkAnalyzer.discover2(subnet, port,
-        timeout: Duration(milliseconds: 5000))
-        .firstWhere((addr) => addr.exists);
-    if (addr != null) {
-      print("found devise at: " + addr.ip);
-      return Socket.connect(addr.ip, port);
-    } else {
-      throw Exception("Could not find device");
-    }
-  }
-
-  @override
-  void close() {
-    socket?.close();
-    serverSocket?.close();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onPanUpdate: (details) {
+          double offset = 7;
+          if (details.delta.dx > offset) {
+            changeDir(Direction.right);
+          } else if (details.delta.dx < -offset) {
+            changeDir(Direction.left);
+          } else if (details.delta.dy < -offset) {
+            changeDir(Direction.up);
+          } else if (details.delta.dy > offset) {
+            changeDir(Direction.down);
+          }
+        },
+        child: Container(
+            color: CupertinoColors.white,
+            child: SafeArea(
+                child: Stack(children: <Widget>[
+                  CustomPaint(
+                    painter: SnakePainter(this.gameState),
+                    child: Container(key: _keyGameBoard),
+                  ),
+                  TextOverlay(this.gameState, restartGame)
+                ]))));
   }
 }
+
+class TextOverlay extends StatelessWidget {
+  GameState gameState;
+  Function resetGame;
+
+  TextOverlay(this.gameState, this.resetGame);
+
+  @override
+  Widget build(BuildContext context) {
+    if (gameState.running && gameState.snake.alive) {
+      return Flex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+                child: Text(
+                    "Debug - length: " + gameState.snake.length.toInt().toString()
+                )),
+            Flexible(
+                child: Text(
+                    "Debug - Alive: " + gameState.snake.alive.toString()
+                ))
+          ]);
+    } else if (gameState.running && !gameState.snake.alive) {
+      return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            leading: CupertinoButton(
+                child: Center(child:Icon(CupertinoIcons.back)),
+                onPressed: () => Navigator.pushNamed(context, HomeViewRoute)),
+          ),
+          child: Center(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("Your Score: " + gameState.snake.length.toInt().toString()),
+                    CupertinoButton(child: Text("Restart"), onPressed: resetGame)
+                  ])));
+    } else {
+      return Container();
+    }
+  }
+}
+
