@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:psnake/game/direction.dart';
 import 'package:psnake/game/model/game-state.dart';
-import 'package:psnake/game/model/multi-game-state.dart';
+import 'package:psnake/multiplayer/multi-game-state.dart';
 import 'package:psnake/game/model/snake.dart';
 import 'package:psnake/game/snake-painter.dart';
 import 'package:psnake/multiplayer/abstract-connection.dart';
@@ -17,7 +17,8 @@ class MultiplayerPlayerGamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(child: MySocketConnector(deviceType: deviceType));
+    return CupertinoPageScaffold(
+        child: MySocketConnector(deviceType: deviceType));
   }
 }
 
@@ -47,16 +48,17 @@ class _MySocketConnectorState extends State<MySocketConnector> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(future: connectionHandler.init(),
-    builder: (context, snapshot) {
-      return MultiPlayerSnake(connectionHandler);
-    });
+    return FutureBuilder(
+        future: connectionHandler.init(),
+        builder: (context, snapshot) {
+          return MultiPlayerSnake(connectionHandler);
+        });
   }
 }
 
 class MultiPlayerSnake extends StatefulWidget {
-
   AbstractConnection connectionHandler;
+
   MultiPlayerSnake(this.connectionHandler);
 
   @override
@@ -68,14 +70,14 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
   GlobalKey _keyGameBoard = GlobalKey();
 
   @override
-  void dispose(){
+  void dispose() {
     gameState.timer.cancel();
     super.dispose();
   }
 
   _getSizes() {
     final RenderBox renderGameBox =
-    _keyGameBoard.currentContext.findRenderObject();
+        _keyGameBoard.currentContext.findRenderObject();
     final sizeGameBox = renderGameBox.size;
     print("SIZE of GameBox: $sizeGameBox");
     return sizeGameBox;
@@ -84,7 +86,7 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
   @override
   void initState() {
     super.initState();
-    gameState = MultiGameState();
+    gameState = MultiGameState(widget.connectionHandler);
     WidgetsBinding.instance.addPostFrameCallback((_) => postBuild());
   }
 
@@ -93,23 +95,23 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
       gameState.createSnake(_getSizes());
       gameState.createOtherSnake(_getSizes());
     });
-    if(widget.connectionHandler.isServer()){
+    if(!widget.connectionHandler.isServer()){
+      startGame();
+    }
+  }
+
+  void startGame(){
+    if (widget.connectionHandler.isServer()) {
       gameState.startGame(() {
         setState(() {
-          if(gameState.snake.alive || gameState.otherSnake.alive){
-            gameState.snake.move();
-            gameState.otherSnake.move();
-            widget.connectionHandler.write(jsonEncode([gameState.snake, gameState.otherSnake]));
-          }else{
-            gameState.timer.cancel();
-          }
+          gameState.gameTick(context);
         });
       });
       widget.connectionHandler.onData = (data) {
         Direction dir = fromString(data);
         gameState.otherSnake.setDir(dir);
       };
-    }else{
+    } else {
       widget.connectionHandler.onData = (data) {
         var snake = jsonDecode(data);
         setState(() {
@@ -123,16 +125,16 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
 
   void restartGame() {
     setState(() {
-      gameState = new MultiGameState();
+      gameState = new MultiGameState(widget.connectionHandler);
     });
     postBuild();
   }
 
   void changeDir(Direction direction) {
     setState(() {
-      if(widget.connectionHandler.isServer()){
+      if (widget.connectionHandler.isServer()) {
         gameState.changeDir(direction);
-      }else{
+      } else {
         widget.connectionHandler.write(direction.toString());
       }
     });
@@ -157,42 +159,38 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
             color: CupertinoColors.white,
             child: SafeArea(
                 child: Stack(children: <Widget>[
-                  CustomPaint(
-                    painter: SnakePainter(this.gameState),
-                    child: Container(key: _keyGameBoard),
-                  ),
-                  TextOverlay(this.gameState, restartGame)
-                ]))));
+              CustomPaint(
+                painter: SnakePainter(this.gameState),
+                child: Container(key: _keyGameBoard),
+              ),
+              TextOverlay(this.gameState, restartGame, startGame, widget.connectionHandler.isServer())
+            ]))));
   }
 }
 
 class TextOverlay extends StatelessWidget {
   GameState gameState;
   Function resetGame;
+  Function startGame;
+  bool isServer;
 
-  TextOverlay(this.gameState, this.resetGame);
+  TextOverlay(this.gameState, this.resetGame, this.startGame, this.isServer);
 
   @override
   Widget build(BuildContext context) {
-    if (gameState.running && gameState.snake.alive) {
-      return Flex(
-          direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-                child: Text(
-                    "Debug - length: " + gameState.snake.length.toInt().toString()
-                )),
-            Flexible(
-                child: Text(
-                    "Debug - Alive: " + gameState.snake.alive.toString()
-                ))
-          ]);
+    if (!gameState.running && this.isServer) {
+      return Center(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CupertinoButton(child: Text("start"), onPressed: startGame)
+              ]));
     } else if (gameState.running && !gameState.snake.alive) {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: CupertinoButton(
-                child: Center(child:Icon(CupertinoIcons.back)),
+                child: Center(child: Icon(CupertinoIcons.back)),
                 onPressed: () => Navigator.pushNamed(context, HomeViewRoute)),
           ),
           child: Center(
@@ -200,12 +198,12 @@ class TextOverlay extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text("Your Score: " + gameState.snake.length.toInt().toString()),
-                    CupertinoButton(child: Text("Restart"), onPressed: resetGame)
-                  ])));
+                Text(
+                    "Your Score: " + gameState.snake.length.toInt().toString()),
+                CupertinoButton(child: Text("Restart"), onPressed: resetGame)
+              ])));
     } else {
       return Container();
     }
   }
 }
-

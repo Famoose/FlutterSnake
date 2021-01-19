@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:psnake/game/direction.dart';
 import 'package:psnake/game/model/game-state.dart';
-import 'package:psnake/game/model/single-game-state.dart';
+import 'package:psnake/singleplayer/single-game-state.dart';
 import 'package:psnake/game/snake-painter.dart';
 
 import '../router.dart';

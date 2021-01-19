@@ -6,9 +6,8 @@ import 'package:psnake/game/model/renderable.dart';
 
 part 'snake.g.dart';
 
-
 @JsonSerializable(explicitToJson: true)
-class Snake implements RenderAble{
+class Snake implements RenderAble {
   List<Tail> tails;
   Direction dir;
   double length;
@@ -23,8 +22,25 @@ class Snake implements RenderAble{
     this.size = GameSize(size.width, size.height);
 
     tails = [
-      new Tail(this.size, new Point.fromSize(this.size, size.width / 2, size.height / 2),
-          dir.oppositDir, length, WIDTH)
+      new Tail(
+          this.size,
+          new Point.fromSize(this.size, size.width / 2, size.height / 2),
+          dir.oppositDir,
+          length,
+          WIDTH)
+    ];
+  }
+
+  Snake.startPoint(Size size, Point point, this.dir, this.length, this.WIDTH) {
+    this.size = GameSize(size.width, size.height);
+
+    tails = [
+      new Tail(
+          this.size,
+          point,
+          dir.oppositDir,
+          length,
+          WIDTH)
     ];
   }
 
@@ -37,9 +53,11 @@ class Snake implements RenderAble{
           0,
           new Tail(
               size,
-              new Point.fromSize(size, tails.first.start.x, tails.first.start.y),
+              new Point.fromSize(
+                  size, tails.first.start.x, tails.first.start.y),
               dir.oppositDir,
-              0, WIDTH));
+              0,
+              WIDTH));
     }
   }
 
@@ -86,7 +104,9 @@ class Snake implements RenderAble{
       return;
     }
   }
+
   factory Snake.fromJson(Map<String, dynamic> json) => _$SnakeFromJson(json);
+
   Map<String, dynamic> toJson() => _$SnakeToJson(this);
 }
 
@@ -99,8 +119,7 @@ class Point {
 
   double get y => _y;
 
-
-  Point(double x, double y){
+  Point(double x, double y) {
     this._x = x;
     this._y = y;
   }
@@ -134,12 +153,14 @@ class Point {
         break;
     }
   }
+
   factory Point.fromJson(Map<String, dynamic> json) => _$PointFromJson(json);
+
   Map<String, dynamic> toJson() => _$PointToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
-class Tail implements RenderAble{
+class Tail implements RenderAble {
   Point start;
   Direction dir;
   double length;
@@ -202,11 +223,11 @@ class Tail implements RenderAble{
         if (this.start.y >= endPoint.y) {
           isOverSide = true;
           paths.add(Path()
-            ..addRect(calcRectFromTo(
-                this.start, Point.fromSize(size, this.start.x, size.height), WIDTH)));
+            ..addRect(calcRectFromTo(this.start,
+                Point.fromSize(size, this.start.x, size.height), WIDTH)));
           paths.add(Path()
-            ..addRect(
-                calcRectFromTo(Point.fromSize(size, this.start.x, 0), endPoint, WIDTH)));
+            ..addRect(calcRectFromTo(
+                Point.fromSize(size, this.start.x, 0), endPoint, WIDTH)));
         }
         break;
       case Direction.right:
@@ -217,18 +238,20 @@ class Tail implements RenderAble{
                 this.start, Point.fromSize(size, 0, this.start.y), WIDTH)));
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                Point.fromSize(size, size.width, this.start.y), endPoint, WIDTH)));
+                Point.fromSize(size, size.width, this.start.y),
+                endPoint,
+                WIDTH)));
         }
         break;
       case Direction.left:
         if (this.start.x >= endPoint.x) {
           isOverSide = true;
           paths.add(Path()
-            ..addRect(calcRectFromTo(
-                this.start, Point.fromSize(size, size.width, this.start.y), WIDTH)));
+            ..addRect(calcRectFromTo(this.start,
+                Point.fromSize(size, size.width, this.start.y), WIDTH)));
           paths.add(Path()
-            ..addRect(
-                calcRectFromTo(Point.fromSize(size, 0, this.start.y), endPoint, WIDTH)));
+            ..addRect(calcRectFromTo(
+                Point.fromSize(size, 0, this.start.y), endPoint, WIDTH)));
         }
         break;
       case Direction.down:
@@ -239,7 +262,9 @@ class Tail implements RenderAble{
                 this.start, Point.fromSize(size, this.start.x, 0), WIDTH)));
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                Point.fromSize(size, this.start.x, size.height), endPoint, WIDTH)));
+                Point.fromSize(size, this.start.x, size.height),
+                endPoint,
+                WIDTH)));
         }
     }
     if (!isOverSide) {
@@ -269,12 +294,18 @@ class Tail implements RenderAble{
   }
 
   factory Tail.fromJson(Map<String, dynamic> json) => _$TailFromJson(json);
+
   Map<String, dynamic> toJson() => _$TailToJson(this);
 }
+
 @JsonSerializable()
-class GameSize{
+class GameSize {
   double width, height;
+
   GameSize(this.width, this.height);
-  factory GameSize.fromJson(Map<String, dynamic> json) => _$GameSizeFromJson(json);
+
+  factory GameSize.fromJson(Map<String, dynamic> json) =>
+      _$GameSizeFromJson(json);
+
   Map<String, dynamic> toJson() => _$GameSizeToJson(this);
 }

@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:psnake/game/model/renderable.dart';
 
-import 'game-state.dart';
-import 'goal.dart';
+import '../game/model/game-state.dart';
+import '../game/model/goal.dart';
 
 class SingleGameState extends GameState{
   List<Goal> goals = [];

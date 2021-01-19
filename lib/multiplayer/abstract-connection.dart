@@ -5,13 +5,18 @@ import 'package:wifi/wifi.dart';
 
 enum DeviceType { advertiser, browser }
 
-abstract class AbstractConnection{
+abstract class AbstractConnection {
   DeviceType deviceType;
   Function onData;
+
   AbstractConnection(this.deviceType);
+
   isServer();
+
   init();
+
   write(String s);
+
   close();
 }
 
@@ -29,26 +34,23 @@ class ConnectionHandler extends AbstractConnection {
   }
 
   @override
-  Future init() async{
+  Future init() async {
     switch (this.deviceType) {
       case DeviceType.advertiser:
         Wifi.ip.then((ip) => print(ip));
-        ServerSocket.bind(InternetAddress.anyIPv4, PORT).then((s) {
-          serverSocket = s;
-          print("Socket online");
-          return serverSocket.listen(listen).asFuture();
-        });
-        break;
+        serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, PORT);
+        print("Socket online");
+        return serverSocket.listen(listen);
       case DeviceType.browser:
         return browserIpAndConnect(PORT).then((socket) {
           listen(socket);
         });
-        break;
     }
   }
 
   setSocket(Socket s) {
     // close open socket and replace
+    print("set Socket");
     socket?.close();
     s.setOption(SocketOption.tcpNoDelay, true);
     socket = s;
@@ -73,7 +75,7 @@ class ConnectionHandler extends AbstractConnection {
     final String subnet = ip.substring(0, ip.lastIndexOf('.'));
 
     final addr = await NetworkAnalyzer.discover2(subnet, port,
-        timeout: Duration(milliseconds: 5000))
+            timeout: Duration(milliseconds: 5000))
         .firstWhere((addr) => addr.exists);
     if (addr != null) {
       print("found devise at: " + addr.ip);
@@ -89,4 +91,3 @@ class ConnectionHandler extends AbstractConnection {
     serverSocket?.close();
   }
 }
-
