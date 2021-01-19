@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:psnake/game/model/renderable.dart';
+
 import 'snake.dart';
 
-class Goal {
+class Goal implements RenderAble{
   Offset center;
   Size boardSize;
   double points;
@@ -24,4 +26,10 @@ class Goal {
     path.addRect(Rect.fromCenter(center: center, width: WIDTH, height: WIDTH));
     return path;
   }
+
+  @override
+  List<Path> toPaths() {
+    return [toPath()];
+  }
+
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:psnake/game/direction.dart';
 import 'package:psnake/game/model/game-state.dart';
+import 'package:psnake/game/model/multi-game-state.dart';
 import 'package:psnake/game/model/snake.dart';
 import 'package:psnake/game/snake-painter.dart';
 import 'package:psnake/multiplayer/abstract-connection.dart';
@@ -63,7 +64,7 @@ class MultiPlayerSnake extends StatefulWidget {
 }
 
 class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
-  GameState gameState;
+  MultiGameState gameState;
   GlobalKey _keyGameBoard = GlobalKey();
 
   @override
@@ -83,9 +84,8 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
   @override
   void initState() {
     super.initState();
-    gameState = GameState();
+    gameState = MultiGameState();
     WidgetsBinding.instance.addPostFrameCallback((_) => postBuild());
-    // At some time you need to complete the future:
   }
 
   void postBuild() {
@@ -110,24 +110,31 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
         gameState.otherSnake.setDir(dir);
       };
     }else{
-      widget.connectionHandler.onData =(data) {
+      widget.connectionHandler.onData = (data) {
         var snake = jsonDecode(data);
-        gameState.snake = Snake.fromJson(snake[0]);
-        gameState.otherSnake = Snake.fromJson(snake[1]);
+        setState(() {
+          gameState.running = true;
+          gameState.snake = Snake.fromJson(snake[0]);
+          gameState.otherSnake = Snake.fromJson(snake[1]);
+        });
       };
     }
   }
 
   void restartGame() {
     setState(() {
-      gameState = new GameState();
+      gameState = new MultiGameState();
     });
     postBuild();
   }
 
   void changeDir(Direction direction) {
     setState(() {
-      gameState.changeDir(direction);
+      if(widget.connectionHandler.isServer()){
+        gameState.changeDir(direction);
+      }else{
+        widget.connectionHandler.write(direction.toString());
+      }
     });
   }
 

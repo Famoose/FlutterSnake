@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:psnake/game/direction.dart';
+import 'package:psnake/game/model/renderable.dart';
 
-import '../direction.dart';
 part 'snake.g.dart';
 
 
 @JsonSerializable(explicitToJson: true)
-class Snake {
+class Snake implements RenderAble{
   List<Tail> tails;
   Direction dir;
   double length;
@@ -60,7 +61,7 @@ class Snake {
   List<Path> toPaths() {
     List<Path> paths = [];
     this.tails.forEach((tail) {
-      var tailPaths = tail.toPath();
+      var tailPaths = tail.toPaths();
       detectSnakeCollision(paths, tailPaths);
       paths.addAll(tailPaths);
     });
@@ -138,7 +139,7 @@ class Point {
 }
 
 @JsonSerializable(explicitToJson: true)
-class Tail {
+class Tail implements RenderAble{
   Point start;
   Direction dir;
   double length;
@@ -190,7 +191,8 @@ class Tail {
     this.size = size;
   }
 
-  List<Path> toPath() {
+  @override
+  List<Path> toPaths() {
     List<Path> paths = [];
     Point endPoint = this.getEndPoint();
     endPoint.adjustToSeamlessFit(this.dir, this.WIDTH);
@@ -237,7 +239,7 @@ class Tail {
                 this.start, Point.fromSize(size, this.start.x, 0), WIDTH)));
           paths.add(Path()
             ..addRect(calcRectFromTo(
-                Point.fromSize(size, this.start.x, size.width), endPoint, WIDTH)));
+                Point.fromSize(size, this.start.x, size.height), endPoint, WIDTH)));
         }
     }
     if (!isOverSide) {

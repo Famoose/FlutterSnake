@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:psnake/game/direction.dart';
 import 'package:psnake/game/model/game-state.dart';
+import 'package:psnake/game/model/single-game-state.dart';
 import 'package:psnake/game/snake-painter.dart';
 
 import '../router.dart';
@@ -18,7 +19,7 @@ class SinglePlayerSnake extends StatefulWidget {
 }
 
 class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
-  GameState gameState;
+  SingleGameState gameState;
   GlobalKey _keyGameBoard = GlobalKey();
 
   @override
@@ -38,9 +39,8 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
   @override
   void initState() {
     super.initState();
-    gameState = GameState();
+    gameState = SingleGameState();
     WidgetsBinding.instance.addPostFrameCallback((_) => postBuild());
-    // At some time you need to complete the future:
   }
 
   void postBuild() {
@@ -57,7 +57,7 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
 
   void restartGame() {
     setState(() {
-      gameState = new GameState();
+      gameState = new SingleGameState();
     });
     postBuild();
   }
@@ -104,21 +104,7 @@ class TextOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (gameState.running && gameState.snake.alive) {
-      return Flex(
-          direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-                child: Text(
-              "Debug - length: " + gameState.snake.length.toInt().toString()
-            )),
-            Flexible(
-                child: Text(
-              "Debug - Alive: " + gameState.snake.alive.toString()
-            ))
-          ]);
-    } else if (gameState.running && !gameState.snake.alive) {
+    if (gameState.running && !gameState.snake.alive) {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: CupertinoButton(

@@ -59,8 +59,7 @@ class ConnectionHandler extends AbstractConnection {
     print("Socket is listening");
     socket.map((data) => String.fromCharCodes(data).trim()).listen((data) {
       onData(data);
-      var time = DateTime.now().toString();
-      print(time + ": " + data);
+      print(data);
     });
   }
 

@@ -1,41 +1,23 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:psnake/game/model/renderable.dart';
 
 import '../../app-state-model.dart';
 import '../direction.dart';
-import 'goal.dart';
 import 'snake.dart';
 
-class GameState {
+abstract class GameState{
   final Duration speed = Duration(milliseconds: 10);
   Timer timer;
   Snake snake;
-  Snake otherSnake;
   Size size;
   bool running = false;
-  List<Goal> goals = [];
 
   createSnake(Size size) {
     this.size = size;
     this.snake = new Snake.start(this.size, Direction.up, 80, size.width/40);
-  }
-
-  createOtherSnake(Size size) {
-    this.size = size;
-    this.otherSnake = new Snake.start(this.size, Direction.up, 80, size.width/40);
-  }
-
-  createGoals(int number) {
-    for(int i = 0; i < number; i++){
-      newGoal();
-    }
-  }
-
-  newGoal() {
-    this.goals.add(Goal(this.size, new Random().nextInt(40).toDouble()));
   }
 
   startGame(Function callback) {
@@ -48,6 +30,7 @@ class GameState {
   gameTick(BuildContext context) {
     if(snake.alive){
       snake.move();
+      rules();
     }else{
       timer.cancel();
       final model = Provider.of<AppStateModel>(context, listen: false);
@@ -60,4 +43,10 @@ class GameState {
       snake.setDir(direction);
     }
   }
+
+  List<RenderAble> toRender(){
+    return [snake];
+  }
+
+  bool rules();
 }

@@ -1,9 +1,7 @@
-
 import 'package:flutter/cupertino.dart';
 
 import 'direction.dart';
 import 'model/game-state.dart';
-import 'model/snake.dart';
 
 class SnakePainter extends CustomPainter {
   GameState gameState;
@@ -15,35 +13,13 @@ class SnakePainter extends CustomPainter {
     var paint = Paint()..color = CupertinoColors.systemPink;
 
     if (gameState.running) {
-      List<Path> goalPaths = [];
-      gameState.goals.forEach((goal) {
-        var path = goal.toPath();
-        goalPaths.add(goal.toPath());
-        canvas.drawPath(path, paint);
-      });
-      var snakePaths = gameState.snake.toPaths();
-      snakePaths.forEach((path) {
-        canvas.drawPath(path, paint);
-      });
-      //hacky
-      if(gameState.otherSnake != null){
-        var snakePaths = gameState.otherSnake.toPaths();
-        snakePaths.forEach((path) {
+      gameState.toRender().forEach((renderAble) {
+        renderAble
+            .toPaths()
+            .forEach((path) {
           canvas.drawPath(path, paint);
         });
-      }
-      checkForPoints(snakePaths.first, goalPaths);
-    }
-  }
-
-  checkForPoints(Path snakeHead, List<Path> goals){
-    for (int i = 0; i < goals.length; i++){
-      var combine = Path.combine(PathOperation.intersect, goals[i], snakeHead);
-      if (combine.computeMetrics().length > 0) {
-        gameState.snake.length += gameState.goals[i].points;
-        gameState.goals.removeAt(i);
-        gameState.newGoal();
-      }
+      });
     }
   }
 
