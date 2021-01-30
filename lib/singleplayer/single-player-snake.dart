@@ -21,6 +21,7 @@ class SinglePlayerSnake extends StatefulWidget {
 class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
   SingleGameState gameState;
   GlobalKey _keyGameBoard = GlobalKey();
+  double offset = 7;
 
   @override
   void dispose(){
@@ -28,7 +29,7 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
     super.dispose();
   }
 
-  _getSizes() {
+  Size _getSizes() {
     final RenderBox renderGameBox =
         _keyGameBoard.currentContext.findRenderObject();
     final sizeGameBox = renderGameBox.size;
@@ -45,7 +46,9 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
 
   void postBuild() {
     setState(() {
-      gameState.createSnake(_getSizes());
+      Size size = _getSizes();
+      offset = size.height * size.width * 0.000025;
+      gameState.createSnake(size);
       gameState.createGoals(5);
     });
     gameState.startGame(() {
@@ -72,7 +75,6 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onPanUpdate: (details) {
-          double offset = 7;
           if (details.delta.dx > offset) {
             changeDir(Direction.right);
           } else if (details.delta.dx < -offset) {

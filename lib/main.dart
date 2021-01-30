@@ -1,10 +1,10 @@
+import 'package:flare_flutter/flare_actor.dart';
+import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:psnake/router.dart';
 import 'app-state-model.dart';
 import 'multiplayer/abstract-connection.dart';
-import 'multiplayer/archive/nearby_descovery.dart';
-import 'multiplayer/multi-player-snake.dart';
 import 'router.dart' as router;
 
 void main() {
@@ -34,24 +34,32 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  final List<FlareControls> _animationControllers = [
+    new FlareControls(),
+    new FlareControls(),
+    new FlareControls()
+  ];
+
+  void _onTapFlarePlay(int i) {
+    _animationControllers[i].play('active');
+  }
+
   @override
   Widget build(BuildContext mcontext) {
     final model = Provider.of<AppStateModel>(mcontext);
     return CupertinoPageScaffold(
         child: CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
-        items: const <BottomNavigationBarItem>[
+        onTap: _onTapFlarePlay,
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.play),
-            label: 'Play',
+            icon: FlareIcon(_animationControllers[0], 'singleplayer'),
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.group),
-            label: 'Multiplayer',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.star),
-            label: 'Highscore',
+            icon: FlareIcon(_animationControllers[2], 'score'),
           ),
         ],
       ),
@@ -63,8 +71,8 @@ class HomePage extends StatelessWidget {
                 child: Center(
                     child: CupertinoButton(
                         child: Center(child: Text("Start Game")),
-                        onPressed: () =>
-                            Navigator.pushNamed(mcontext, SingleGameViewRoute))),
+                        onPressed: () => Navigator.pushNamed(
+                            mcontext, SingleGameViewRoute))),
               );
             });
           case 1:
@@ -75,30 +83,34 @@ class HomePage extends StatelessWidget {
                     Expanded(
                       child: CupertinoButton(
                         onPressed: () {
-                          Navigator.pushNamed(mcontext, MultiGameViewRoute, arguments: DeviceType.browser);
+                          Navigator.pushNamed(mcontext, MultiGameViewRoute,
+                              arguments: DeviceType.browser);
                         },
                         child: Container(
                           color: CupertinoColors.systemRed,
                           child: Center(
                               child: Text(
-                                'BROWSER',
-                                style: TextStyle(color: CupertinoColors.white, fontSize: 40),
-                              )),
+                            'BROWSER',
+                            style: TextStyle(
+                                color: CupertinoColors.white, fontSize: 40),
+                          )),
                         ),
                       ),
                     ),
                     Expanded(
                       child: CupertinoButton(
                         onPressed: () {
-                          Navigator.pushNamed(mcontext, MultiGameViewRoute, arguments: DeviceType.advertiser);
+                          Navigator.pushNamed(mcontext, MultiGameViewRoute,
+                              arguments: DeviceType.advertiser);
                         },
                         child: Container(
                           color: CupertinoColors.activeGreen,
                           child: Center(
                               child: Text(
-                                'ADVERTISER',
-                                style: TextStyle(color: CupertinoColors.white, fontSize: 40),
-                              )),
+                            'ADVERTISER',
+                            style: TextStyle(
+                                color: CupertinoColors.white, fontSize: 40),
+                          )),
                         ),
                       ),
                     ),
@@ -132,5 +144,24 @@ class HomePage extends StatelessWidget {
         }
       },
     ));
+  }
+}
+
+class FlareIcon extends StatelessWidget {
+  FlareControls _animationController;
+  String artboard;
+
+  FlareIcon(this._animationController, this.artboard);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(7),
+        child: FlareActor('assets/animations/menu_bar.flr',
+            controller: _animationController,
+            artboard: artboard,
+            alignment: Alignment.bottomCenter,
+            fit: BoxFit.contain,
+            sizeFromArtboard: true));
   }
 }

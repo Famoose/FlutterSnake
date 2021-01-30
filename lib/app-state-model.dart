@@ -1,18 +1,23 @@
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppStateModel extends foundation.ChangeNotifier {
   List<Score> _scores;
 
-  addScore(double score){
-    _scores.add(new Score(score, new DateTime.now()));
-    notifyListeners();
-    _saveScore();
+  addScore(double score) {
+    _scores.sort((a, b) => b.score.compareTo(a.score));
+    if (_scores.length > 9) {
+      if (_scores[9].score < score) {
+        _scores.removeRange(8, _scores.length - 1);
+      }
+      _scores.add(new Score(score));
+      notifyListeners();
+      _saveScore();
+    }
   }
 
   List<Score> getScores() {
-    _scores.sort((a,b) => b.score.compareTo(a.score));
+    _scores.sort((a, b) => b.score.compareTo(a.score));
     return _scores;
   }
 
@@ -22,7 +27,7 @@ class AppStateModel extends foundation.ChangeNotifier {
     final value = prefs.getStringList(key) ?? [];
     print('read: $value');
     //somehow parse back to score. JSON?
-    _scores = value.map((s) => new Score(double.parse(s), null)).toList();
+    _scores = value.map((s) => new Score(double.parse(s))).toList();
   }
 
   _saveScore() async {
@@ -36,9 +41,8 @@ class AppStateModel extends foundation.ChangeNotifier {
 
 class Score {
   double score;
-  DateTime time;
 
-  Score(this.score, this.time);
+  Score(this.score);
 
   @override
   String toString() {

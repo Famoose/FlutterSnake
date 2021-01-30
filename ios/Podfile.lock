@@ -1,40 +1,21 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_nearby_connections (0.0.1):
-    - Flutter
-    - SwiftyJSON (~> 4.0)
-  - fluttertoast (0.0.2):
-    - Flutter
-    - Toast
   - integration_test (0.0.1):
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - SwiftyJSON (4.3.0)
-  - Toast (4.0.0)
   - wifi (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_nearby_connections (from `.symlinks/plugins/flutter_nearby_connections/ios`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - wifi (from `.symlinks/plugins/wifi/ios`)
 
-SPEC REPOS:
-  trunk:
-    - SwiftyJSON
-    - Toast
-
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_nearby_connections:
-    :path: ".symlinks/plugins/flutter_nearby_connections/ios"
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
   shared_preferences:
@@ -44,12 +25,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  flutter_nearby_connections: 68c6cb88dcbf781e74adac01f4e93b853a30ee34
-  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   integration_test: 5ed24a436eb7ec17b6a13046e9bf7ca4a404e59e
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   wifi: d7d77c94109e36c4175d845f0a5964eadba71060
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
