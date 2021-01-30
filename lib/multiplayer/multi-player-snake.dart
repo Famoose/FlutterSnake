@@ -41,7 +41,7 @@ class _MySocketConnectorState extends State<MySocketConnector> {
   }
 
   @override
-  void dispose() {
+  void dispose(){
     connectionHandler.close();
     super.dispose();
   }
@@ -169,7 +169,7 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
 }
 
 class TextOverlay extends StatelessWidget {
-  GameState gameState;
+  MultiGameState gameState;
   Function resetGame;
   Function startGame;
   bool isServer;
@@ -186,7 +186,7 @@ class TextOverlay extends StatelessWidget {
               children: <Widget>[
                 CupertinoButton(child: Text("start"), onPressed: startGame)
               ]));
-    } else if (gameState.running && !gameState.snake.alive) {
+    } else if (gameState.running && (!gameState.snake.alive || !gameState.otherSnake.alive)) {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: CupertinoButton(

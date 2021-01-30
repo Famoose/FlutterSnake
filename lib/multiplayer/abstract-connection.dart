@@ -86,8 +86,8 @@ class ConnectionHandler extends AbstractConnection {
   }
 
   @override
-  void close() {
-    socket?.close();
-    serverSocket?.close();
+  void close() async {
+    socket?.destroy();
+    await serverSocket?.close();
   }
 }
