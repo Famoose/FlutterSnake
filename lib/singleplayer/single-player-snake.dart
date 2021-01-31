@@ -9,7 +9,7 @@ import '../router.dart';
 class SinglePlayerGamePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(child: SinglePlayerSnake());
+    return SinglePlayerSnake();
   }
 }
 
@@ -24,7 +24,7 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
   double offset = 7;
 
   @override
-  void dispose(){
+  void dispose() {
     gameState.timer.cancel();
     super.dispose();
   }
@@ -73,28 +73,29 @@ class _SinglePlayerSnakeState extends State<SinglePlayerSnake> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        onPanUpdate: (details) {
-          if (details.delta.dx > offset) {
-            changeDir(Direction.right);
-          } else if (details.delta.dx < -offset) {
-            changeDir(Direction.left);
-          } else if (details.delta.dy < -offset) {
-            changeDir(Direction.up);
-          } else if (details.delta.dy > offset) {
-            changeDir(Direction.down);
-          }
-        },
-        child: Container(
-            color: CupertinoColors.white,
-            child: SafeArea(
-                child: Stack(children: <Widget>[
-              CustomPaint(
-                painter: SnakePainter(this.gameState),
-                child: Container(key: _keyGameBoard),
-              ),
-              TextOverlay(this.gameState, restartGame)
-            ]))));
+    return Stack(children: <Widget>[
+      GestureDetector(
+
+          onPanUpdate: (details) {
+            if (details.delta.dx > offset) {
+              changeDir(Direction.right);
+            } else if (details.delta.dx < -offset) {
+              changeDir(Direction.left);
+            } else if (details.delta.dy < -offset) {
+              changeDir(Direction.up);
+            } else if (details.delta.dy > offset) {
+              changeDir(Direction.down);
+            }
+          },
+          child: SafeArea(
+              child: Stack(children: <Widget>[
+            CustomPaint(
+              painter: SnakePainter(this.gameState),
+              child: Container(key: _keyGameBoard),
+            ),
+          ]))),
+      TextOverlay(gameState, restartGame)
+    ]);
   }
 }
 
@@ -110,7 +111,7 @@ class TextOverlay extends StatelessWidget {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: CupertinoButton(
-                child: Center(child:Icon(CupertinoIcons.back)),
+                child: Center(child: Icon(CupertinoIcons.back)),
                 onPressed: () => Navigator.pushNamed(context, HomeViewRoute)),
           ),
           child: Center(
@@ -118,7 +119,8 @@ class TextOverlay extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                Text("Your Score: " + gameState.snake.length.toInt().toString()),
+                Text(
+                    "Your Score: " + gameState.snake.length.toInt().toString()),
                 CupertinoButton(child: Text("Restart"), onPressed: resetGame)
               ])));
     } else {

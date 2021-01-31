@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: 'Snake',
-      theme: CupertinoThemeData(primaryColor: CupertinoColors.systemPink),
+      theme: CupertinoThemeData(primaryColor: CupertinoColors.systemPink, brightness: Brightness.dark),
       initialRoute: HomeViewRoute,
       onGenerateRoute: router.generateRoute,
       onUnknownRoute: (settings) => CupertinoPageRoute(

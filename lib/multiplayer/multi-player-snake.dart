@@ -156,7 +156,6 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
           }
         },
         child: Container(
-            color: CupertinoColors.white,
             child: SafeArea(
                 child: Stack(children: <Widget>[
               CustomPaint(
