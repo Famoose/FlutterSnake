@@ -3,6 +3,7 @@ import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:psnake/router.dart';
+import 'package:psnake/styles/styles.dart';
 import 'app-state-model.dart';
 import 'multiplayer/abstract-connection.dart';
 import 'router.dart' as router;
@@ -22,7 +23,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: 'Snake',
-      theme: CupertinoThemeData(primaryColor: CupertinoColors.systemPink, brightness: Brightness.dark),
+      theme: CupertinoThemeData(
+          primaryColor: CupertinoColors.systemPink,
+          brightness: Brightness.dark),
       initialRoute: HomeViewRoute,
       onGenerateRoute: router.generateRoute,
       onUnknownRoute: (settings) => CupertinoPageRoute(
@@ -121,23 +124,25 @@ class HomePage extends StatelessWidget {
           case 2:
             return CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: ListView.builder(
-                  // Let the ListView know how many items it needs to build.
-                  itemCount: model.getScores().length,
-                  // Provide a builder function. This is where the magic happens.
-                  // Convert each item into a widget based on the type of item it is.
-                  itemBuilder: (context, index) {
-                    final item = model.getScores()[index];
-
-                    return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(item.score.toInt().toString()),
-                          //Text(item.time.toString())
-                        ]);
-                  },
-                ),
-              );
+                  navigationBar: CupertinoNavigationBar(
+                    middle: Text('Highscore'),
+                  ),
+                  child: Center(
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                    child: ListView.builder(
+                      // Let the ListView know how many items it needs to build.
+                      itemCount: model.getScores().length,
+                      // Provide a builder function. This is where the magic happens.
+                      // Convert each item into a widget based on the type of item it is.
+                      itemBuilder: (context, index) {
+                        final item = model.getScores()[index];
+                        return Center(
+                            child: Text(item.score.toInt().toString(), style: Styles.normalTextStyle)
+                        );
+                      },
+                    ),
+                  )));
             });
           default:
             return null;
@@ -156,7 +161,7 @@ class FlareIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(7),
+        padding: EdgeInsets.all(7),
         child: FlareActor('assets/animations/menu_bar.flr',
             controller: _animationController,
             artboard: artboard,

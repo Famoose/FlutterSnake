@@ -8,7 +8,7 @@ class AppStateModel extends foundation.ChangeNotifier {
     _scores.sort((a, b) => b.score.compareTo(a.score));
     if (_scores.length > 9) {
       if (_scores[9].score < score) {
-        _scores.removeRange(8, _scores.length - 1);
+        _scores.removeRange(9, _scores.length);
       }
       _scores.add(new Score(score));
       notifyListeners();
