@@ -9,7 +9,9 @@ class AppStateModel extends foundation.ChangeNotifier {
     if (_scores.length > 9) {
       if (_scores[9].score < score) {
         _scores.removeRange(9, _scores.length);
+        _scores.add(new Score(score));
       }
+    } else {
       _scores.add(new Score(score));
       notifyListeners();
       _saveScore();
