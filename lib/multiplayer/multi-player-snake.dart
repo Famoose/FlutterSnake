@@ -17,8 +17,7 @@ class MultiplayerPlayerGamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        child: MySocketConnector(deviceType: deviceType));
+    return Container(child: MySocketConnector(deviceType: deviceType));
   }
 }
 
@@ -41,7 +40,7 @@ class _MySocketConnectorState extends State<MySocketConnector> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     connectionHandler.close();
     super.dispose();
   }
@@ -68,6 +67,7 @@ class MultiPlayerSnake extends StatefulWidget {
 class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
   MultiGameState gameState;
   GlobalKey _keyGameBoard = GlobalKey();
+  double offset = 7;
 
   @override
   void dispose() {
@@ -91,16 +91,17 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
   }
 
   void postBuild() {
+    offset = _getSizes().height * _getSizes().width * 0.000025;
     setState(() {
       gameState.createSnake(_getSizes());
       gameState.createOtherSnake(_getSizes());
     });
-    if(!widget.connectionHandler.isServer()){
+    if (!widget.connectionHandler.isServer()) {
       startGame();
     }
   }
 
-  void startGame(){
+  void startGame() {
     if (widget.connectionHandler.isServer()) {
       gameState.startGame(() {
         setState(() {
@@ -142,28 +143,29 @@ class _MultiPlayerSnakeState extends State<MultiPlayerSnake> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        onPanUpdate: (details) {
-          double offset = 7;
-          if (details.delta.dx > offset) {
-            changeDir(Direction.right);
-          } else if (details.delta.dx < -offset) {
-            changeDir(Direction.left);
-          } else if (details.delta.dy < -offset) {
-            changeDir(Direction.up);
-          } else if (details.delta.dy > offset) {
-            changeDir(Direction.down);
-          }
-        },
-        child: Container(
-            child: SafeArea(
-                child: Stack(children: <Widget>[
-              CustomPaint(
-                painter: SnakePainter(this.gameState),
-                child: Container(key: _keyGameBoard),
-              ),
-              TextOverlay(this.gameState, restartGame, startGame, widget.connectionHandler.isServer())
-            ]))));
+    return Stack(children: <Widget>[
+      GestureDetector(
+          onPanUpdate: (details) {
+            if (details.delta.dx > offset) {
+              changeDir(Direction.right);
+            } else if (details.delta.dx < -offset) {
+              changeDir(Direction.left);
+            } else if (details.delta.dy < -offset) {
+              changeDir(Direction.up);
+            } else if (details.delta.dy > offset) {
+              changeDir(Direction.down);
+            }
+          },
+          child: SafeArea(
+              child: Stack(children: <Widget>[
+            CustomPaint(
+              painter: SnakePainter(this.gameState),
+              child: Container(key: _keyGameBoard),
+            ),
+          ]))),
+      TextOverlay(this.gameState, restartGame, startGame,
+          widget.connectionHandler.isServer())
+    ]);
   }
 }
 
@@ -183,9 +185,10 @@ class TextOverlay extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                CupertinoButton(child: Text("start"), onPressed: startGame)
-              ]));
-    } else if (gameState.running && (!gameState.snake.alive || !gameState.otherSnake.alive)) {
+            CupertinoButton(child: Text("start"), onPressed: startGame)
+          ]));
+    } else if (gameState.running &&
+        (!gameState.snake.alive || !gameState.otherSnake.alive)) {
       return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: CupertinoButton(
