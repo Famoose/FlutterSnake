@@ -1,6 +1,7 @@
-# psnake
+# FlutterSnake
 
-psnake
+Is a Snake Game made with Flutter working crossplattform on iOS and Android.
+Players can play singel and p2p multiplayer together.
 
 ## Getting Started
 
